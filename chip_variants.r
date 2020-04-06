@@ -1,4 +1,5 @@
 #!/usr/bin/env Rscript
+library(data.table)
 args = commandArgs(trailingOnly=TRUE)
 # the size of simulated chip (Mega base)
 if (is.na(args[2])) {
@@ -35,7 +36,7 @@ setkey(frq, "ctg")
 
 chip_size <- wg_chip / 3088
 chip_size <- chip_size * max(seq_pos$pos)
-
+# chip_size <- chip_size * nrow(seq_pos)
 result <- list()
 for (i in seq(nrow(frq))) {
     nsample <- ceiling(frq$frq[i] * chip_size)

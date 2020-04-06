@@ -42,7 +42,7 @@ class Simulator:
             demographic_events=self.demographic_events)
         dp.print_history()
 
-    def simulation(self, len, seed, output=None):
+    def simulation(self, sim_length, seed, output=None):
         print("Simulating the trees ...")
         if (mapfile==None):
             print("constant recombination rate: ", self.rho)
@@ -50,11 +50,12 @@ class Simulator:
             tree_seq = msprime.simulate(
                 population_configurations = self.pc,
                 demographic_events = self.demographic_events,
-                mutation_rate = self.mu,
-                length=len,
+                length=sim_length,
                 recombination_rate=self.rho,
                 random_seed=seed,
                 Ne=20000)
+            tree_seq = msprime.mutate(tree_seq, rate=self.mu, random_seed=seed,
+                model=msprime.InfiniteSites(alphabet=msprime.NUCLEOTIDES))
         else:
             print("Reading " + self.mapfile, "...")
             self.recomb_map = msprime.RecombinationMap.read_hapmap(mapfile)
@@ -62,11 +63,11 @@ class Simulator:
             tree_seq = msprime.simulate(
                 population_configurations = self.pc,
                 demographic_events = self.demographic_events,
-                mutation_rate = self.mu,
-#                length=len,
                 recombination_map=self.recomb_map,
                 random_seed=seed,
                 Ne=20000)
+            tree_seq = msprime.mutate(tree_seq, rate=self.mu, random_seed=seed,
+                model=msprime.InfiniteSites(alphabet=msprime.NUCLEOTIDES))
 
 
             # tree_seq = msprime.simulate(
@@ -74,7 +75,7 @@ class Simulator:
         #     mutation_rate=1.65e-8, random_seed=10)
         if output != None:
             with gzip.open(output + ".vcf.gz", "wt") as vcf_file:
-                tree_seq.write_vcf(vcf_file, ploidy=2)
+                tree_seq.write_vcf(vcf_file, ploidy=2, position_transform="legacy")
             tree_seq.dump(output + ".tree")
         return tree_seq
 
@@ -105,4 +106,4 @@ if __name__ == "__main__":
     mapfile = args['map']
     demofile = args['demo']
     sim = Simulator(mapfile, demofile, sample_size=int(args['sample_size']), mu=1.65e-8, rho=1.2e-8)
-    sim.simulation(len=int(args['n']), output=args['out'], seed=args['seed'])
+    sim.simulation(sim_length=int(args['n']), output=args['out'], seed=args['seed'])
