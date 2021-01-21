@@ -1,4 +1,5 @@
 #!/usr/bin/env Rscript
+library(data.table)
 args = commandArgs(trailingOnly=TRUE)
 # the size of simulated chip (Mega base)
 if (is.na(args[2])) {
